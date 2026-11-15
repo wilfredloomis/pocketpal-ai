@@ -43,9 +43,10 @@ jobs:
 
       - name: Hermes compile
         run: |
-          HERMESC=$(find node_modules/react-native/sdks/hermesc -type f -name hermesc | head -1)
+          HERMESC=node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
           echo "hermesc=$HERMESC"
           test -x "$HERMESC"
+          chmod +x "$HERMESC"
           "$HERMESC" -O -emit-binary -out out/index.android.bundle.hbc out/index.android.bundle
           ls -l out/index.android.bundle.hbc
           python3 -c "import struct;b=open('out/index.android.bundle.hbc','rb').read();print('magic',b[:8].hex(),'version',struct.unpack('<I',b[8:12])[0],'size',len(b))"
