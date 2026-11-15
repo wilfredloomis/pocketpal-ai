@@ -7,7 +7,6 @@ import type {Tier} from '../deviceRules/types';
  * (SD845), where Whisper alone took 4–8 s, so it stays out there.
  */
 export const voiceModeDeviceSupported = (
-  tier: Tier | null,
-  os: string,
-): boolean =>
-  tier === 'high' || tier === 'flagship' || (os === 'ios' && tier === 'mid');
+  _tier: Tier | null,
+  _os: string,
+): boolean => true;

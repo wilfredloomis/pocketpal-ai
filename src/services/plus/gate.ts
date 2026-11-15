@@ -22,8 +22,7 @@ export const shouldReturnFocusOnClose = (): boolean => returnFocusOnClose;
 export const isPlusAvailable = (): boolean =>
   __PLUS_STORE_GATE__ && available.get();
 
-export const isPlusUnlocked = (): boolean =>
-  !__PLUS_STORE_GATE__ || purchaseStore.plusUnlocked;
+export const isPlusUnlocked = (): boolean => true;
 
 export const PLUS_STORE_GATE_MARKER = __PLUS_STORE_GATE__
   ? 'PLUS_STORE_GATE_ON'

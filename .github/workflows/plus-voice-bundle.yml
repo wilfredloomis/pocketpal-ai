@@ -1,0 +1,57 @@
+name: plus-voice-bundle
+on:
+  push:
+    branches: [plus-voice]
+  workflow_dispatch:
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      PLUS_STORE_GATE: 'true'
+      E2E_BUILD: 'false'
+      NODE_OPTIONS: '--max-old-space-size=6144'
+      RNLLAMA_SKIP_POSTINSTALL: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.21.0'
+
+      - name: Enable yarn
+        run: |
+          corepack enable
+          corepack prepare yarn@1.22.22 --activate
+          yarn --version
+
+      - name: Install dependencies
+        run: yarn install --network-timeout 600000
+
+      - name: Metro bundle
+        run: |
+          mkdir -p out
+          npx react-native bundle \
+            --platform android \
+            --dev false \
+            --entry-file index.js \
+            --bundle-output out/index.android.bundle \
+            --assets-dest out/assets \
+            --minify true
+          ls -l out/index.android.bundle
+
+      - name: Hermes compile
+        run: |
+          HERMESC=$(find node_modules/react-native/sdks/hermesc -type f -name hermesc | head -1)
+          echo "hermesc=$HERMESC"
+          test -x "$HERMESC"
+          "$HERMESC" -O -emit-binary -out out/index.android.bundle.hbc out/index.android.bundle
+          ls -l out/index.android.bundle.hbc
+          python3 -c "import struct;b=open('out/index.android.bundle.hbc','rb').read();print('magic',b[:8].hex(),'version',struct.unpack('<I',b[8:12])[0],'size',len(b))"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pocketpal-hbc
+          path: out/index.android.bundle.hbc
+          if-no-files-found: error
